@@ -33,15 +33,7 @@ jobs:
       
       - name: Download WIBOR data
         run: python download_wibor.py
-      
-      - name: Upload screenshots for debugging
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: downloads/*.png
-          retention-days: 7
-      
+            
       - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
