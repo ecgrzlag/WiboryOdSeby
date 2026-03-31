@@ -2,7 +2,7 @@ name: Aktualizuj dane WIBOR
 
 on:
   schedule:
-    - cron: '0 18 * * 1-5'
+    - cron: '50 9 * * 1-5'
   workflow_dispatch:
 
 env:
