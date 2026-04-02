@@ -1,7 +1,6 @@
 from playwright.sync_api import sync_playwright
 import csv
 from datetime import datetime
-from zoneinfo import ZoneInfo
 import os
 
 TICKERS = {
@@ -12,17 +11,16 @@ TICKERS = {
     'plbplnon': 'WIBID_ON'
 }
 
-def download_via_direct_url(page, ticker, name, download_dir):
-    """Pobiera CSV przez bezpośredni URL"""
+def download_single_ticker(page, ticker, name, download_dir):
+    """Pobiera CSV dla jednego tickera"""
     print(f"Pobieram {name} ({ticker})...")
     
-    # Bezpośredni URL do CSV
-    csv_url = f"https://stooq.pl/q/d/l/?s={ticker}&i=d"
-    print(f"  URL: {csv_url}")
+    page.goto(f"https://stooq.pl/q/d/?s={ticker}", wait_until="domcontentloaded", timeout=60000)
+    page.wait_for_timeout(2000)
     
-    # Nawiguj do URL - to powinno wywołać download
-    with page.expect_download(timeout=60000) as download_info:
-        page.goto(csv_url)
+    # Pobierz plik
+    with page.expect_download(timeout=30000) as download_info:
+        page.click('a:has-text("Pobierz dane")')
     
     download = download_info.value
     filepath = os.path.join(download_dir, f"{ticker}.csv")
@@ -39,23 +37,23 @@ def merge_csv_files(download_dir, output_file):
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
                 reader = csv.reader(f)
-                next(reader)
+                next(reader)  # Pomiń nagłówek
                 for row in reader:
                     if len(row) >= 5:
                         all_rows.append({
-                            'Data': row[0],
-                            'Otwarcie': row[1],
-                            'Najwyższy': row[2],
-                            'Najniższy': row[3],
-                            'Zamknięcie': row[4],
+                            'Date': row[0],
+                            'Open': row[1],
+                            'High': row[2],
+                            'Low': row[3],
+                            'Close': row[4],
                             'Ticker': name
                         })
             print(f"  {name}: {sum(1 for r in all_rows if r['Ticker'] == name)} wierszy")
     
-    all_rows.sort(key=lambda x: (x['Data'], x['Ticker']), reverse=True)
+    all_rows.sort(key=lambda x: (x['Date'], x['Ticker']), reverse=True)
     
     with open(output_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=['Data', 'Otwarcie', 'Najwyższy', 'Najniższy', 'Zamknięcie', 'Ticker'])
+        writer = csv.DictWriter(f, fieldnames=['Date', 'Open', 'High', 'Low', 'Close', 'Ticker'])
         writer.writeheader()
         writer.writerows(all_rows)
     
@@ -74,15 +72,14 @@ def main():
         )
         page = context.new_page()
         
-        # Najpierw wejdź na stronę główną (ustaw cookies/sesję)
-        print("Wchodzę na stronę główną Stooq...")
+        # Wejdź na stronę główną (ustaw cookies)
         page.goto("https://stooq.pl/", wait_until="domcontentloaded", timeout=60000)
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(2000)
         
-        # Teraz pobierz każdy ticker przez bezpośredni URL
+        # Pobierz dane dla każdego tickera
         for ticker, name in TICKERS.items():
             try:
-                download_via_direct_url(page, ticker, name, download_dir)
+                download_single_ticker(page, ticker, name, download_dir)
             except Exception as e:
                 print(f"  Błąd przy {ticker}: {e}")
         
@@ -91,8 +88,7 @@ def main():
     merge_csv_files(download_dir, "wibor_all.csv")
     
     with open("last_update.txt", "w") as f:
-        warsaw_time = datetime.now(ZoneInfo("Europe/Warsaw"))
-        f.write(warsaw_time.strftime("%Y-%m-%d %H:%M:%S"))
+        f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC"))
 
 if __name__ == "__main__":
     main()
