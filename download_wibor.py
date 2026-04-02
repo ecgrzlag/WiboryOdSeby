@@ -144,15 +144,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
-
----
-
-## Gdzie znajdziesz plik CSV w repozytorium:
-
-Po uruchomieniu workflow plik `wibor_all.csv` będzie w głównym katalogu repozytorium:
-**https://github.com/skuzminskisk/Wibor-data** → plik `wibor_all.csv`
-
-Dla Power Query użyj raw URL:
-```
-https://raw.githubusercontent.com/skuzminskisk/Wibor-data/main/wibor_all.csv
