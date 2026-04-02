@@ -15,7 +15,7 @@ def download_single_ticker(page, ticker, name, download_dir):
     """Pobiera CSV dla jednego tickera"""
     print(f"Pobieram {name} ({ticker})...")
     
-    page.goto(f"https://stooq.pl/q/d/?s={ticker}", wait_until="domcontentloaded", timeout=60000)
+    page.goto(f"https://stooq.pl/q/d/?s={ticker}&c=0", wait_until="domcontentloaded", timeout=60000)
     page.wait_for_timeout(2000)
     
     # Pobierz plik
