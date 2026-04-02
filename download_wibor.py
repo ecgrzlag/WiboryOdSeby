@@ -89,8 +89,8 @@ def main():
     merge_csv_files(download_dir, "wibor_all.csv")
     
     with open("last_update.txt", "w") as f:
-    warsaw_time = datetime.now(ZoneInfo("Europe/Warsaw"))
-    f.write(warsaw_time.strftime("%Y-%m-%d %H:%M:%S"))
+        warsaw_time = datetime.now(ZoneInfo("Europe/Warsaw"))
+        f.write(warsaw_time.strftime("%Y-%m-%d %H:%M:%S"))
 
 if __name__ == "__main__":
     main()
