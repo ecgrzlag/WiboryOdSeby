@@ -33,6 +33,14 @@ jobs:
       
       - name: Download WIBOR data
         run: python download_wibor.py
+
+      - name: Upload debug screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshots
+          path: downloads/*.png
+          retention-days: 3
             
       - name: Commit and push
         run: |
