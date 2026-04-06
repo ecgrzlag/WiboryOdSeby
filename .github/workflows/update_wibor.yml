@@ -37,14 +37,6 @@ jobs:
       - name: Download WIBOR data
         run: xvfb-run --auto-servernum python download_wibor.py
         timeout-minutes: 30
-
-      - name: Upload debug screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-screenshots
-          path: downloads/*.png
-          retention-days: 3
             
       - name: Commit and push
         run: |
